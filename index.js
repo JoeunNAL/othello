@@ -3,7 +3,7 @@ const black = 'black';
 const white = 'white';
 
 // 변수 state(위치 탐색용)
-const state = new Array(8).fill('').map(el => new Array(8).fill(''));
+let state = [];
 
 function renderGrid(state) {
   const main = document.querySelector('main');
@@ -36,9 +36,14 @@ function renderGrid(state) {
   }
 }
 
-function renderTurn() {
-  const turn_infor_html = document.querySelectorAll('.turn');
-  turn_infor_html.forEach(el => el.remove());
+function removeGrid() {
+  const grid_container_html = document.getElementById('grid_container');
+  grid_container_html.remove();
+}
+
+function showCurrentTurn() {
+  const turn_infor_html = document.querySelector('.turn');
+  turn_infor_html?.remove();
 
   const main_html = document.querySelector('main');
   const score_html = document.createElement('section');
@@ -48,19 +53,22 @@ function renderTurn() {
 }
 
 function initialSet(number) {
+  black_turn = true;
+  state = new Array(8).fill('').map(el => new Array(8).fill(''));
+
   const middle_index = number / 2 - 1;
 
-  state[middle_index][middle_index] = 'white';
+  state[middle_index][middle_index] = white;
   state[middle_index][middle_index + 1] = black;
   state[middle_index + 1][middle_index] = black;
   state[middle_index + 1][middle_index + 1] = white;
 
   renderGrid(state);
-  renderTurn();
+  showCurrentTurn();
 }
 
-function getFlipList(row, col) {
-  const current_turn = black_turn ? black : white;
+function getFlipList(row, col, turn) {
+  const current_turn = turn ? black : white;
   let total = [];
 
   // 오른쪽 이동
@@ -243,6 +251,60 @@ function flip(flip_targets) {
   });
 }
 
+function searchState() {
+  const empty_spots = [];
+  let black_count = 0;
+  let white_count = 0;
+
+  for (i = 0; i < 8; i++) {
+    for (j = 0; j < 8; j++) {
+      if (state[i][j] === '') {
+        empty_spots.push({ row: i, col: j });
+        continue;
+      }
+      if (state[i][j] === black) {
+        black_count++;
+        continue;
+      }
+      white_count++;
+    }
+  }
+
+  return { empty_spots, black_count, white_count };
+}
+
+function endGame(black_count, white_count) {
+  const winner = black_count > white_count ? '흑' : '백';
+  if (window.confirm(`${winner} 승리.\n게임을 재시작하시겠습니까?`)) {
+    removeGrid();
+    initialSet(8);
+  }
+}
+
+function checkStateByNextTurn() {
+  const state_count_info = searchState();
+
+  // 빈칸 없거나 한쪽 바둑돌이 없는 경우
+  if (
+    state_count_info.empty_spots.length === 0 ||
+    state_count_info.black_count === 0 ||
+    state_count_info.white_count === 0
+  ) {
+    endGame(state_count_info.black_count, state_count_info.white_count);
+    return;
+  }
+
+  const candidates = state_count_info.empty_spots.filter(
+    spot => getFlipList(spot.row, spot.col, black_turn).length > 0
+  );
+
+  if (candidates.length === 0) {
+    alert(`${black_turn ? '검은' : '하얀'}돌을 놓을 수 있는 위치가 없습니다.`);
+    black_turn = !black_turn;
+    showCurrentTurn();
+  }
+}
+
 function addStone(event) {
   const target = event.target;
 
@@ -259,7 +321,7 @@ function addStone(event) {
     return;
   }
 
-  const flip_targets = getFlipList(row_index, col_index);
+  const flip_targets = getFlipList(row_index, col_index, black_turn);
 
   if (flip_targets.length === 0) {
     return;
@@ -268,12 +330,14 @@ function addStone(event) {
   state[row_index][col_index] = black_turn ? black : white;
   flip(flip_targets);
 
-  const grid_container_html = document.getElementById('grid_container');
-  grid_container_html.remove();
+  removeGrid();
   renderGrid(state);
 
+  // 상대턴으로 변경, 놓을 수 있는 자리 탐색
   black_turn = !black_turn;
-  renderTurn();
+  showCurrentTurn();
+
+  checkStateByNextTurn();
 }
 
 function render() {
