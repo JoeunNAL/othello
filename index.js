@@ -290,7 +290,9 @@ function checkStateByNextTurn() {
     state_count_info.black_count === 0 ||
     state_count_info.white_count === 0
   ) {
-    endGame(state_count_info.black_count, state_count_info.white_count);
+    setTimeout(() => {
+      endGame(state_count_info.black_count, state_count_info.white_count);
+    }, 1000);
     return;
   }
 
@@ -336,7 +338,6 @@ function addStone(event) {
   // 상대턴으로 변경, 놓을 수 있는 자리 탐색
   black_turn = !black_turn;
   showCurrentTurn();
-
   checkStateByNextTurn();
 }
 
