@@ -68,180 +68,52 @@ function initialSet(number) {
 }
 
 function getFlipList(row, col, turn) {
-  const current_turn = turn ? black : white;
+  const current_color = turn ? black : white;
   let total = [];
 
-  // 오른쪽 이동
-  const right_directions = [];
-  let right_col = col;
-  while (right_col < 8) {
-    right_col++;
-    const value = state[row][right_col];
-    if (value === current_turn) {
-      total = [...total, ...right_directions];
-      break;
-    }
-    if (value === '') {
-      break;
-    }
-    if (value !== current_turn) {
-      right_directions.push({ row, col: right_col });
-    }
-  }
+  const directions = [
+    [-1, -1],
+    [-1, 0],
+    [-1, 1],
+    [0, -1],
+    [0, 1],
+    [1, -1],
+    [1, 0],
+    [1, 1],
+  ];
 
-  // 왼쪽 이동
-  const left_directions = [];
-  let left_col = col;
-  while (left_col >= 0) {
-    left_col--;
-    const value = state[row][left_col];
-    if (value === current_turn) {
-      total = [...total, ...left_directions];
-      break;
-    }
-    if (value === '') {
-      break;
-    }
-    if (value !== current_turn) {
-      left_directions.push({ row, col: left_col });
-    }
-  }
+  for (i = 0; i < directions.length; i++) {
+    const temp_targets = [];
+    let temp_row = row;
+    let temp_col = col;
 
-  // 위 이동
-  const up_directions = [];
-  let up_row = row;
-  while (up_row >= 0) {
-    up_row--;
-    if (state[up_row]) {
-      const value = state[up_row][col];
-      if (value === current_turn) {
-        total = [...total, ...up_directions];
+    for (j = 0; j < 8; j++) {
+      temp_row += directions[i][0];
+      temp_col += directions[i][1];
+
+      if (temp_row < 0 || temp_row >= 8 || temp_col < 0 || temp_col >= 8) {
         break;
       }
-      if (value === '') {
-        break;
-      }
-      if (value !== current_turn) {
-        up_directions.push({ row: up_row, col });
+
+      if (state[temp_row]) {
+        const value = state[temp_row][temp_col];
+        if (value === current_color) {
+          total = [...total, ...temp_targets];
+          break;
+        }
+        if (value === '') {
+          break;
+        }
+        if (value !== current_color) {
+          temp_targets.push({ row: temp_row, col: temp_col });
+        }
       }
     }
   }
 
-  // 아래 이동
-  const down_directions = [];
-  let down_row = row;
-  while (down_row < 8) {
-    down_row++;
-    if (state[down_row]) {
-      const value = state[down_row][col];
-      if (value === current_turn) {
-        total = [...total, ...down_directions];
-        break;
-      }
-      if (value === '') {
-        break;
-      }
-      if (value !== current_turn) {
-        down_directions.push({ row: down_row, col });
-      }
-    }
-  }
-
-  // 2시 방향
-  const up_right_directions = [];
-  let up_right_row = row;
-  let up_right_col = col;
-
-  while (up_right_row >= 0 && up_right_col < 8) {
-    up_right_row--;
-    up_right_col++;
-    if (state[up_right_row]) {
-      const value = state[up_right_row][up_right_col];
-      if (value === current_turn) {
-        total = [...total, ...up_right_directions];
-        break;
-      }
-      if (value === '') {
-        break;
-      }
-      if (value !== current_turn) {
-        up_right_directions.push({ row: up_right_row, col: up_right_col });
-      }
-    }
-  }
-
-  // 5시 방향
-  const down_right_directions = [];
-  let down_right_row = row;
-  let down_right_col = col;
-
-  while (down_right_row < 8 && down_right_col < 8) {
-    down_right_row++;
-    down_right_col++;
-    if (state[down_right_row]) {
-      const value = state[down_right_row][down_right_col];
-      if (value === current_turn) {
-        total = [...total, ...down_right_directions];
-        break;
-      }
-      if (value === '') {
-        break;
-      }
-      if (value !== current_turn) {
-        down_right_directions.push({
-          row: down_right_row,
-          col: down_right_col,
-        });
-      }
-    }
-  }
-
-  // 7시 방향
-  const down_left_directions = [];
-  let down_left_row = row;
-  let down_left_col = col;
-
-  while (down_left_col >= 0 && down_left_row < 8) {
-    down_left_row++;
-    down_left_col--;
-    if (state[down_left_row]) {
-      const value = state[down_left_row][down_left_col];
-      if (value === current_turn) {
-        total = [...total, ...down_left_directions];
-        break;
-      }
-      if (value === '') {
-        break;
-      }
-      if (value !== current_turn) {
-        down_left_directions.push({ row: down_left_row, col: down_left_col });
-      }
-    }
-  }
-
-  // 11시 방향
-  const up_left_directions = [];
-  let up_left_row = row;
-  let up_left_col = col;
-
-  while (up_left_row >= 0 && up_left_col >= 0) {
-    up_left_row--;
-    up_left_col--;
-    if (state[up_left_row]) {
-      const value = state[up_left_row][up_left_col];
-      if (value === current_turn) {
-        total = [...total, ...up_left_directions];
-        break;
-      }
-      if (value === '') {
-        break;
-      }
-      if (value !== current_turn) {
-        up_left_directions.push({ row: up_left_row, col: up_left_col });
-      }
-    }
-  }
-
+  // 중복제거
+  // const deduplication = new Set(total);
+  // return [...deduplication];
   return total;
 }
 
