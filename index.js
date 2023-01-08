@@ -1,8 +1,10 @@
-let black_turn = true;
+const grid_number = 8; // 짝수 입력
+
 const black = 'black';
 const white = 'white';
+let black_turn = true;
 
-// 변수 state(위치 탐색용)
+// 2차 배열 state(위치 탐색용)
 let state = [];
 
 function renderGrid(state) {
@@ -54,7 +56,9 @@ function showCurrentTurn() {
 
 function initialSet(number) {
   black_turn = true;
-  state = new Array(8).fill('').map(el => new Array(8).fill(''));
+  state = new Array(grid_number)
+    .fill('')
+    .map(el => new Array(grid_number).fill(''));
 
   const middle_index = number / 2 - 1;
 
@@ -87,11 +91,16 @@ function getFlipList(row, col, turn) {
     let temp_row = row;
     let temp_col = col;
 
-    for (j = 0; j < 8; j++) {
+    for (j = 0; j < grid_number; j++) {
       temp_row += directions[i][0];
       temp_col += directions[i][1];
 
-      if (temp_row < 0 || temp_row >= 8 || temp_col < 0 || temp_col >= 8) {
+      if (
+        temp_row < 0 ||
+        temp_row >= grid_number ||
+        temp_col < 0 ||
+        temp_col >= grid_number
+      ) {
         break;
       }
 
@@ -128,8 +137,8 @@ function searchState() {
   let black_count = 0;
   let white_count = 0;
 
-  for (i = 0; i < 8; i++) {
-    for (j = 0; j < 8; j++) {
+  for (i = 0; i < grid_number; i++) {
+    for (j = 0; j < grid_number; j++) {
       if (state[i][j] === '') {
         empty_spots.push({ row: i, col: j });
         continue;
@@ -149,7 +158,7 @@ function endGame(black_count, white_count) {
   const winner = black_count > white_count ? '흑' : '백';
   if (window.confirm(`${winner} 승리.\n게임을 재시작하시겠습니까?`)) {
     removeGrid();
-    initialSet(8);
+    initialSet(grid_number);
   }
 }
 
@@ -164,7 +173,7 @@ function checkStateByNextTurn() {
   ) {
     setTimeout(() => {
       endGame(state_count_info.black_count, state_count_info.white_count);
-    }, 1000);
+    }, 0);
     return;
   }
 
@@ -214,7 +223,7 @@ function addStone(event) {
 }
 
 function render() {
-  initialSet(8);
+  initialSet(grid_number);
 }
 
 render();
